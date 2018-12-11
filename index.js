@@ -26,26 +26,29 @@ import {
   SpinalGraphService
 } from "spinal-env-viewer-graph-service";
 
+import * as constants from "./constants";
+
 export default {
+  constants,
   async createContext(name) {
     if (name === undefined || name === "") {
       throw Error(name + ": Invalid name");
     }
 
-    const context = await SpinalGraphService.addContext(name, "validationContext");
+    const context = await SpinalGraphService.addContext(name, constants.CONTEXT_TYPE);
     const contextId = context.getId().get();
     const valid = SpinalGraphService.createNode({
-      name: "valid",
-      type: "state"
+      name: constants.VALID_NODE_NAME,
+      type: constants.STATE_TYPE
     });
     const invalid = SpinalGraphService.createNode({
-      name: "invalid",
-      type: "state"
+      name: constants.INVALID_NODE_NAME,
+      type: constants.STATE_TYPE
     });
 
     await Promise.all([
-      SpinalGraphService.addChildInContext(contextId, valid, contextId, "hasState"),
-      SpinalGraphService.addChildInContext(contextId, invalid, contextId, "hasState")
+      SpinalGraphService.addChildInContext(contextId, valid, contextId, constants.STATE_RELATION),
+      SpinalGraphService.addChildInContext(contextId, invalid, contextId, constants.STATE_RELATION)
     ]);
 
     return contextId;
