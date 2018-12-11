@@ -34,8 +34,14 @@ export default {
 
     const context = await SpinalGraphService.addContext(name, "validationContext");
     const contextId = context.getId().get();
-    const valid = SpinalGraphService.createNode("valid", "state");
-    const invalid = SpinalGraphService.createNode("invalid", "state");
+    const valid = SpinalGraphService.createNode({
+      name: "valid",
+      type: "state"
+    });
+    const invalid = SpinalGraphService.createNode({
+      name: "invalid",
+      type: "state"
+    });
 
     await Promise.all([
       SpinalGraphService.addChildInContext(contextId, valid, contextId, "hasState"),
