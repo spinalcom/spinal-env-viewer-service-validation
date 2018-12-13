@@ -26,10 +26,19 @@ import {
   SpinalGraphService
 } from "spinal-env-viewer-graph-service";
 
+import bimObjectService from "spinal-env-viewer-plugin-bimobjectservice";
+
 import * as constants from "./constants";
 
 export default {
   constants,
+
+  /**
+   * Creates a validation context with a given name and 2 states.
+   * @param {String} name Name of the Context
+   * @throws {Error} When name is undefined or empty
+   * @returns {Promise<String>} Id of the created SpinalContext
+   */
   async createContext(name) {
     if (name === undefined || name === "") {
       throw Error(name + ": Invalid name");
@@ -52,5 +61,37 @@ export default {
     ]);
 
     return contextId;
+  },
+
+  /**
+   * Fills the valid and invalid states with BIMObjects.
+   * @param {String} contextId Id of the validation context
+   * @param {Array<dbId>} valid Array of valid dbIds
+   * @param {Array<dbId>} invalid Array of invalid dbIds
+   * @returns {Promise<>} An empty promise
+   */
+  async createRecord(contextId, newValid, newInvalid) {
+    //TODO: use getChildrenInContext (not in graph service yet)
+    const children = await SpinalGraphService.getChildren(contextId, constants.STATE_RELATION);
+    const oldValid = children[0];
+    const oldInvalid = children[1];
+    const promises = [];
+
+    const cmpBIMObjectDbId = (bim, dbId) => bim.info.dbId === dbId;
+    const cmpDbIdBIMObject = (dbId, bim) => bim.info.dbId === dbId;
+
+    const validToDel = _.differenceWith(newValid, oldValid, cmpDbIdBIMObject);
+    const validToAdd = _.differenceWith(oldValid, newValid, cmpBIMObjectDbId);
+    const invalidToDel = _.differenceWith(newinvalid, oldInvalid, cmpDbIdBIMObject);
+    const invalidToAdd = _.differenceWith(oldInvalid, newinvalid, cmpBIMObjectDbId);
+
+    for (let toAdd of validToAdd) {
+      SpinalGraphService.addChildInContext(contextId);
+    }
+
+    for (let toDel of validToDel) {
+      //TODO: Create BIMObjectService.removeBIMObject
+      // promises.push(SpinalGraphService.removeChild(contextId, toDel.id.get()));
+    }
   }
 };

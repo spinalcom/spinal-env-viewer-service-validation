@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/spinalcom/spinal-env-viewer-service-validation#readme",
   "dependencies": {
-    "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git"
+    "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git",
+    "spinal-env-viewer-plugin-bimobjectservice": "git+https://github.com/spinalcom/spinal-env-viewer-plugin-bimobjectservice.git"
   }
 }
