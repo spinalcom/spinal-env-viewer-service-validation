@@ -25,41 +25,96 @@
 import {
   SpinalGraphService,
   SpinalContext,
-  SpinalNode
+  SpinalNode,
+  SPINAL_RELATION_PTR_LST_TYPE
 } from "spinal-env-viewer-graph-service";
+
+import bimObjectService from "spinal-env-viewer-plugin-bimobjectservice";
 
 import * as constants from "./constants";
 
-export default {
-  /**
-   * Creates a validation context with a given name and 2 states.
-   * @param {string} name Name of the Context
-   * @throws {Error} When name is undefined or empty
-   * @returns {Promise<SpinalContext>} The created SpinalContext
-   */
-  async createContext(name: string): Promise<SpinalContext> {
-    if (name === undefined || name === "") {
-      throw Error(name + ": Invalid name");
-    }
-
-    const context = await SpinalGraphService.addContext(
-      name,
-      constants.CONTEXT_TYPE
-    );
-    const valid = new SpinalNode(
-      constants.VALID_NODE_NAME,
-      constants.STATE_TYPE
-    );
-    const invalid = new SpinalNode(
-      constants.INVALID_NODE_NAME,
-      constants.STATE_TYPE
-    );
-
-    await Promise.all([
-      context.addChildInContext(valid, constants.STATE_RELATION),
-      context.addChildInContext(invalid, constants.STATE_RELATION)
-    ]);
-
-    return context;
+/**
+ * Creates a validation context with a given name and 2 states.
+ * @param {string} name Name of the Context
+ * @throws {Error} When name is undefined or empty
+ * @returns {Promise<SpinalContext>} The created SpinalContext
+ */
+async function createValidationContext(name: string): Promise<SpinalContext> {
+  if (name === undefined || name === "") {
+    throw Error(name + ": Invalid name");
   }
-};
+
+  const context: SpinalContext = await SpinalGraphService.addContext(
+    name,
+    constants.VALIDATION_CONTEXT_TYPE
+  );
+
+  return context;
+}
+
+/**
+ * Creates a state containing the given dbIds.
+ * @param {SpinalContext} context Context in which to create the state
+ * @param {string} name Name of the state
+ * @param {Array<Number>} dbIds Array of dbIds to use to create the BIMObjects
+ * @returns {SpinalNode} Created state
+ */
+async function createState(
+  context: SpinalContext,
+  name: string,
+  dbIds: Array<Number>
+): SpinalNode {
+  const state: SpinalNode = new SpinalNode(name, constants.STATE_TYPE);
+  const promises: Array<Promise<SpinalNode>> = [];
+
+  for (let dbId of dbIds) {
+    promises.push(bimObjectService.addBIMObject(context, state, dbId));
+  }
+
+  await Promise.all(promises);
+  return state;
+}
+
+/**
+ * Creates a record from two arrays of valid and invalid dbIds.
+ * @param {SpinalContext} context Context in which to create the record
+ * @param {Array<Number>} validDbIds Valid dbIds to put in the valid state
+ * @param {Array<Number>} invalidDbIds Invalid dbIds to put in the invalid state
+ * @returns {SpinalNode} Created record
+ */
+async function createRecord(
+  context: SpinalContext,
+  validDbIds: Array<Number>,
+  invalidDbIds: Array<Number>
+): SpinalNode {
+  const record: SpinalNode = new SpinalNode(
+    "record - " + Date(),
+    constants.RECORD_TYPE
+  );
+
+  await context.addChildInContext(record, constants.RECORD_RELATION);
+
+  const [validState, invalidState] = await Promise.all([
+    createState(context, constants.VALID_STATE_NAME, validDbIds),
+    createState(context, constants.INVALID_STATE_NAME, invalidDbIds)
+  ]);
+
+  await Promise.all([
+    record.addChildInContext(
+      validState,
+      constants.STATE_RELATION,
+      SPINAL_RELATION_PTR_LST_TYPE,
+      context
+    ),
+    record.addChildInContext(
+      invalidState,
+      constants.STATE_RELATION,
+      SPINAL_RELATION_PTR_LST_TYPE,
+      context
+    )
+  ]);
+
+  return record;
+}
+
+export { createValidationContext, createState, createRecord };
