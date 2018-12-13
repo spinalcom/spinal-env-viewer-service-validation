@@ -2,9 +2,12 @@
   "name": "spinal-env-viewer-service-validation",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "build/index.js",
+  "types": "types/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -r build &> /dev/null ; rm -r types &> /dev/null ; tsc",
+    "dev": "rm -r build &> /dev/null ; rm -r types &> /dev/null ; tsc -w"
   },
   "repository": {
     "type": "git",
@@ -19,5 +22,9 @@
   "homepage": "https://github.com/spinalcom/spinal-env-viewer-service-validation#readme",
   "dependencies": {
     "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.14",
+    "typescript": "^3.2.2"
   }
 }

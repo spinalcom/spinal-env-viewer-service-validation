@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const CONTEXT_TYPE = "validationContext";
+exports.CONTEXT_TYPE = CONTEXT_TYPE;
+const STATE_TYPE = "state";
+exports.STATE_TYPE = STATE_TYPE;
+const STATE_RELATION = "hasState";
+exports.STATE_RELATION = STATE_RELATION;
+const VALID_NODE_NAME = "valid";
+exports.VALID_NODE_NAME = VALID_NODE_NAME;
+const INVALID_NODE_NAME = "invalid";
+exports.INVALID_NODE_NAME = INVALID_NODE_NAME;

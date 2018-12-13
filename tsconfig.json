@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "outDir": "build",
+    "declaration": true,
+    "declarationDir": "types"
+  },
+  "files": [
+    "./index.ts"
+  ],
+  "include": [
+    "src/*"
+  ]
+}
