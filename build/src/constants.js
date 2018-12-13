@@ -2,10 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const CONTEXT_TYPE = "validationContext";
 exports.CONTEXT_TYPE = CONTEXT_TYPE;
-const STATE_TYPE = "state";
+const STATE_TYPE = "validationState";
 exports.STATE_TYPE = STATE_TYPE;
-const STATE_RELATION = "hasState";
+const STATE_RELATION = "hasValidationState";
 exports.STATE_RELATION = STATE_RELATION;
+const RECORD_TYPE = "validationRecord";
+exports.RECORD_TYPE = RECORD_TYPE;
+const RECORD_RELATION = "hasValidationRecord";
+exports.RECORD_RELATION = RECORD_RELATION;
 const VALID_NODE_NAME = "valid";
 exports.VALID_NODE_NAME = VALID_NODE_NAME;
 const INVALID_NODE_NAME = "invalid";

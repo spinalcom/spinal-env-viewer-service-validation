@@ -34,26 +34,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const spinal_env_viewer_graph_service_1 = require("spinal-env-viewer-graph-service");
 const constants = require("./constants");
 exports.default = {
+    /**
+     * Creates a validation context with a given name and 2 states.
+     * @param {string} name Name of the Context
+     * @throws {Error} When name is undefined or empty
+     * @returns {Promise<SpinalContext>} The created SpinalContext
+     */
     createContext(name) {
         return __awaiter(this, void 0, void 0, function* () {
             if (name === undefined || name === "") {
                 throw Error(name + ": Invalid name");
             }
             const context = yield spinal_env_viewer_graph_service_1.SpinalGraphService.addContext(name, constants.CONTEXT_TYPE);
-            const contextId = context.getId().get();
-            const valid = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode({
-                name: constants.VALID_NODE_NAME,
-                type: constants.STATE_TYPE
-            });
-            const invalid = spinal_env_viewer_graph_service_1.SpinalGraphService.createNode({
-                name: constants.INVALID_NODE_NAME,
-                type: constants.STATE_TYPE
-            });
+            const valid = new spinal_env_viewer_graph_service_1.SpinalNode(constants.VALID_NODE_NAME, constants.STATE_TYPE);
+            const invalid = new spinal_env_viewer_graph_service_1.SpinalNode(constants.INVALID_NODE_NAME, constants.STATE_TYPE);
             yield Promise.all([
-                spinal_env_viewer_graph_service_1.SpinalGraphService.addChildInContext(contextId, valid, contextId, constants.STATE_RELATION),
-                spinal_env_viewer_graph_service_1.SpinalGraphService.addChildInContext(contextId, invalid, contextId, constants.STATE_RELATION)
+                context.addChildInContext(valid, constants.STATE_RELATION),
+                context.addChildInContext(invalid, constants.STATE_RELATION)
             ]);
-            return contextId;
+            return context;
         });
     }
 };

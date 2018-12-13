@@ -22,12 +22,22 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+import {
+  SpinalGraphService,
+  SpinalContext,
+  SpinalNode
+} from "spinal-env-viewer-graph-service";
 
 import * as constants from "./constants";
 
 export default {
-  async createContext(name: string): Promise<string> {
+  /**
+   * Creates a validation context with a given name and 2 states.
+   * @param {string} name Name of the Context
+   * @throws {Error} When name is undefined or empty
+   * @returns {Promise<SpinalContext>} The created SpinalContext
+   */
+  async createContext(name: string): Promise<SpinalContext> {
     if (name === undefined || name === "") {
       throw Error(name + ": Invalid name");
     }
@@ -36,31 +46,20 @@ export default {
       name,
       constants.CONTEXT_TYPE
     );
-    const contextId = context.getId().get();
-    const valid = SpinalGraphService.createNode({
-      name: constants.VALID_NODE_NAME,
-      type: constants.STATE_TYPE
-    });
-    const invalid = SpinalGraphService.createNode({
-      name: constants.INVALID_NODE_NAME,
-      type: constants.STATE_TYPE
-    });
+    const valid = new SpinalNode(
+      constants.VALID_NODE_NAME,
+      constants.STATE_TYPE
+    );
+    const invalid = new SpinalNode(
+      constants.INVALID_NODE_NAME,
+      constants.STATE_TYPE
+    );
 
     await Promise.all([
-      SpinalGraphService.addChildInContext(
-        contextId,
-        valid,
-        contextId,
-        constants.STATE_RELATION
-      ),
-      SpinalGraphService.addChildInContext(
-        contextId,
-        invalid,
-        contextId,
-        constants.STATE_RELATION
-      )
+      context.addChildInContext(valid, constants.STATE_RELATION),
+      context.addChildInContext(invalid, constants.STATE_RELATION)
     ]);
 
-    return contextId;
+    return context;
   }
 };
