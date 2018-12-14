@@ -6,8 +6,9 @@
   "types": "types/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -r build &> /dev/null ; rm -r types &> /dev/null ; tsc",
-    "dev": "rm -r build &> /dev/null ; rm -r types &> /dev/null ; tsc -w"
+    "clean": "[ -e build ] && rm -r build ; [ -e types ] && rm -r types ; true",
+    "build": "npm run clean ; tsc",
+    "dev": "npm run clean ; tsc -w"
   },
   "repository": {
     "type": "git",
