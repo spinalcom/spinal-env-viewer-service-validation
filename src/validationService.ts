@@ -33,6 +33,16 @@ import bimObjectService from "spinal-env-viewer-plugin-bimobjectservice";
 
 import * as constants from "./constants";
 
+interface Property {
+  name: string;
+}
+
+function promiseGetPorperties(model, dbId): Promise<Property> {
+  return new Promise(resolve => {
+    model.getProperties(dbId, resolve);
+  });
+}
+
 /**
  * Creates a validation context with a given name and 2 states.
  * @param {string} name Name of the Context
@@ -56,19 +66,26 @@ async function createValidationContext(name: string): Promise<SpinalContext> {
  * Creates a state containing the given dbIds.
  * @param {SpinalContext} context Context in which to create the state
  * @param {string} name Name of the state
+ * @param {Object} model Model of the digital twin
  * @param {Array<Number>} dbIds Array of dbIds to use to create the BIMObjects
  * @returns {SpinalNode} Created state
  */
 async function createState(
   context: SpinalContext,
   name: string,
+  model: Object,
   dbIds: Array<Number>
 ): SpinalNode {
   const state: SpinalNode = new SpinalNode(name, constants.STATE_TYPE);
   const promises: Array<Promise<SpinalNode>> = [];
 
   for (let dbId of dbIds) {
-    promises.push(bimObjectService.addBIMObject(context, state, dbId));
+    promises.push(
+      promiseGetPorperties(model, dbId).then(prop => {
+        const name: string = prop.name;
+        return bimObjectService.addBIMObject(context, state, dbId, name);
+      })
+    );
   }
 
   await Promise.all(promises);
@@ -78,12 +95,14 @@ async function createState(
 /**
  * Creates a record from two arrays of valid and invalid dbIds.
  * @param {SpinalContext} context Context in which to create the record
+ * @param {Object} model Model of the digital twin
  * @param {Array<Number>} validDbIds Valid dbIds to put in the valid state
  * @param {Array<Number>} invalidDbIds Invalid dbIds to put in the invalid state
  * @returns {SpinalNode} Created record
  */
 async function createRecord(
   context: SpinalContext,
+  model: Object,
   validDbIds: Array<Number>,
   invalidDbIds: Array<Number>
 ): SpinalNode {
@@ -95,8 +114,8 @@ async function createRecord(
   await context.addChildInContext(record, constants.RECORD_RELATION);
 
   const [validState, invalidState] = await Promise.all([
-    createState(context, constants.VALID_STATE_NAME, validDbIds),
-    createState(context, constants.INVALID_STATE_NAME, invalidDbIds)
+    createState(context, constants.VALID_STATE_NAME, model, validDbIds),
+    createState(context, constants.INVALID_STATE_NAME, model, invalidDbIds)
   ]);
 
   await Promise.all([
